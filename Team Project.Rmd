@@ -1,0 +1,43 @@
+---
+title: "Project 1"
+author: "Ping"
+date: "2022-09-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Consider 2016 weather data. Which regions or states have the most consistent daily temps? the most variable daily temps? Which regions or states have the most sunny days? the fewest sunny days?
+
+```{r packageCheck, include=FALSE}
+mypacks <- c("ggplot2","mapproj","dplyr")  # what packages are needed?
+packs <- installed.packages()   # find installed package list
+install.me <- mypacks[!(mypacks %in% packs[,"Package"])]  #what needs to be installed?
+if (length(install.me) >= 1) install.packages(install.me, repos = "http://cran.us.r-project.org")   # install (if needed)
+lapply(mypacks, library, character.only=TRUE)  # load all packages
+```
+
+```{r, echo=FALSE}
+weather <- read.csv("https://raw.githubusercontent.com/mgelman/data/master/MonthlyWeather.csv")
+```
+
+```{r}
+MainStates <- map_data("state")
+str(MainStates)
+```
+
+```{r}
+year2016 <- weather %>% filter(year == "2016")
+weather$state <- tolower(weather$state) 
+MainStates <- map_data("state")
+ggplot(MainStates) + coord_map() + 
+    geom_map(data=year2016, aes(map_id = state, fill=avgTmpDiffF), map = MainStates) + 
+    geom_polygon(aes(x=long, y=lat, group=group), color="black", fill=NA) + 
+expand_limits(x=MainStates$long, y=MainStates$lat) + ggtitle("Most consistent temperatures by State in 2016") +
+  scale_fill_distiller(palette="RdYlBu",direction=1) 
+```
+
+```
